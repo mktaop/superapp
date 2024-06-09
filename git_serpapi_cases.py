@@ -135,7 +135,6 @@ def main():
 
     """
     
-    #setup()
     chosen = get_choice()
     model = get_llm()
     
@@ -178,8 +177,7 @@ def main():
             	csv_writer.writerow(["Title", "Link", "Length", "Published_date"])
             	
             	for result in yt_results:
-            		csv_writer.writerow([result["title"], result["link"], result["length"], 
-                                   result["published_date"]])
+            		csv_writer.writerow([result["title"], result["link"], result["length"], result["published_date"]])
             df_yt = pd.read_csv('/Users/Documents/serpapi_ytresults.csv', index_col=0)
             st.write("Top 10 results from the search, copy the url of the video of interest:")
             st.dataframe(df_yt.head(10))
@@ -203,7 +201,6 @@ def main():
                     )
                     transcripts.append(transcript)
                 
-                #model = get_llm()
                 prompt = st.text_input("Enter prompt for LLM, e.g. Summarize the following youtube transcripts.")
                 if prompt:
                     message=[]
@@ -211,7 +208,22 @@ def main():
                     message.append({"role": "user", "content": f"{transcripts}"})
                     for result in getgptresponse(client, model, temperature=0, message=message, streaming=False):
                         output = result[0]
-                        st.write(output)
+                        choice_output = st.radio(
+                            "How do you want to see the output?",
+                            ["View the text copy", "Read out by a talking head"],
+                            index=None, horizontal=True,
+                        )
+                        if choice_output == None:
+                            pass
+                        elif choice_output=="View the text copy":
+                            st.write(output)
+                        elif choice_output=="Read out by a talking head":
+                            img = "" #provide url to your image or upload from your local directory...png preferred
+                            split_key = DID_API_KEY.split(':')
+                            username = split_key[0]
+                            password = split_key[1]
+                            video_url = generate_video(username, password, output, img)
+                            st.video(video_url)
                     
     elif chosen==":red[Generic search]":
         st.subheader("Google Search & Summarize.", divider='red')
@@ -255,7 +267,6 @@ def main():
                     totaldoc2=remove_punctuation(totaldoc)
                     transcripts.append(totaldoc2)
                 
-                #model = get_llm()
                 temperature=0
                 streaming=False
                 prompt1 = st.text_input("Enter your prompt or quesiton related to the website content for LLM to answer.")
@@ -275,7 +286,7 @@ def main():
                         elif choice_output=="View the text copy":
                             st.write(output2)
                         elif choice_output=="Read out by a talking head":
-                            img = "" #insert url to your image or upload one from your local directory
+                            img = "" #provide url to your image or upload from your local directory...png preferred
                             split_key = DID_API_KEY.split(':')
                             username = split_key[0]
                             password = split_key[1]
@@ -327,7 +338,6 @@ def main():
                     totaldocb2=remove_punctuation(totaldocb)
                     transcripts.append(totaldocb2)
                 
-                #model = get_llm()
                 temperature=0
                 streaming=False
                 prompt2 = st.text_input("Enter your prompt or quesiton related to the website content for LLM to answer.")
@@ -337,7 +347,22 @@ def main():
                     message3.append({"role": "user", "content": f"{transcripts}"})
                     for result in getgptresponse(client, model, temperature=temperature, message=message3, streaming=streaming):
                         output3 = result[0]
-                        st.write(output3)
+                        choice_output = st.radio(
+                            "How do you want to see the output?",
+                            ["View the text copy", "Read out by a talking head"],
+                            index=None, horizontal=True,
+                        )
+                        if choice_output == None:
+                            pass
+                        elif choice_output=="View the text copy":
+                            st.write(output3)
+                        elif choice_output=="Read out by a talking head":
+                            img = "" #provide url to your image or upload from your local directory...png preferred
+                            split_key = DID_API_KEY.split(':')
+                            username = split_key[0]
+                            password = split_key[1]
+                            video_url = generate_video(username, password, output3, img)
+                            st.video(video_url)
         else:
             pass
         
@@ -368,34 +393,23 @@ def main():
                         hotel_results = results["properties"]
                         shortlist = hotel_results[0:7]    
                         json_string = json.dumps(shortlist)
-                        #model = get_llm()
                         temperature=0
                         streaming=False
-                        prompt3 = st.text_input("Enter your prompt or question.")
-                        if prompt3:
-                            getsummary = st.button("Get Results")
-                            if getsummary:
-                                message4=[]
-                                message4.append({"role": "user", "content": f"{prompt3}"})
-                                message4.append({"role": "user", "content": f"{json_string}"})
-                                for result in getgptresponse(client, model, temperature=temperature, message=message4, streaming=streaming):
-                                    output4 = result[0]
-                                    choice_output = st.radio(
-                                        "How do you want to see the output?",
-                                        ["View the text copy", "Read out by a talking head"],
-                                        index=None, horizontal=True,
-                                    )
-                                    if choice_output == None:
-                                        pass
-                                    elif choice_output=="View the text copy":
-                                        st.write(output4)
-                                    elif choice_output=="Read out by a talking head":
-                                        img = "" #inser url to your image or import from local directory
-                                        split_key = DID_API_KEY.split(':')
-                                        username = split_key[0]
-                                        password = split_key[1]
-                                        video_url2 = generate_video(username, password, output4, img)
-                                        st.video(video_url2)
+                        #Feel free to change the prompt below to your liking, or insert an input variable to capture user specific prompt
+                        prompt3="""following is a list of resorts that i am considering, the list has 
+                                     some attributes about them. first, i need you to summarize the list 
+                                     and give me table showing the price ranges, how many stars, and amenities for each of the resort.  
+                                     then, provice a narrative that summarizes the differences based on 
+                                     the different attributes. provide your recommnedation at the end. provide all of this in a markdown format."""
+                        getsummary = st.button("Get Results")
+                        if getsummary:
+                            message4=[]
+                            message4.append({"role": "user", "content": f"{prompt3}"})
+                            message4.append({"role": "user", "content": f"{json_string}"})
+                            for result in getgptresponse(client, model, temperature=temperature, message=message4, streaming=streaming):
+                                output4 = result[0]
+                                st.markdown(output4)
+                                
 
                                 
     elif chosen == ":violet[Finance search]":
