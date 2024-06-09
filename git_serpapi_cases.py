@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Mar 31 13:33:30 2024
-
-@author: avi_patel
-"""
-
 import streamlit as st, os, csv, pandas as pd, json, datetime, requests, matplotlib.pyplot as plt
 from pytube import YouTube
 from serpapi import GoogleSearch
